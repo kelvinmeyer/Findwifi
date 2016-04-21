@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Find wifi</string>
+    <string name="title_activity_main">Map</string>
+    <string name="title_activity_detial">Wifi Detail</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
+    <string name="action_help">Help and feedback</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="pref_description_show_open_only">Show open hot spots only</string>
+    <string name="pref_title_show_open_only">Show open wifi locations</string>
+    <string name="pref_title_Nuber_wifi">Number of wifi spots shown</string>
+    <string name="key_open_switch">key_open_closed_switch</string>
+    <string name="key_number_wifi">key_number_wifi_spots_text</string>
+    <string name="pref_default_Number_Spots">"20"</string>
+</resources>
