@@ -63,6 +63,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putDouble("lat", getUserPosition().latitude );
+        outState.putDouble("lng", getUserPosition().longitude );
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -71,8 +78,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         setLocation(true);
-        enableBestUpdates();
         setUserPosition(-33.957503, 18.462007);
+        if (savedInstanceState != null) {
+            Toast.makeText(this, savedInstanceState.getString("message"), Toast.LENGTH_LONG).show();
+            //set position based on bundle
+        }
+        else{
+            enableBestUpdates();
+        }
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         topX = Integer.parseInt(sharedPref.getString(getString(R.string.key_number_wifi),getString(R.string.pref_default_Number_Spots)));
         showOpenOnly =sharedPref.getBoolean(getString(R.string.key_open_switch), true);
