@@ -1,15 +1,17 @@
 package com.gmail.kelvinmeyer13.findwifi;
 
-import android.content.Context;
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -32,11 +34,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      **/
     private static final String TAG = MainActivity.class.getSimpleName();
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     //location
     private LatLng userPosition;
     private GoogleApiClient mGoogleApiClient;
-    private boolean locationOn = false;
-    private LocationManager locationManager;
     //map
     private static GoogleMap mMap;
     private static PlaceLocation[] wifiLocations;
@@ -47,10 +48,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     //setters
     public void setUserPosition(double lat,double lng){
         userPosition = new LatLng(lat,lng);
-    }
-
-    private void setLocation(boolean b) {
-        locationOn = b;
     }
 
     //getters
@@ -82,11 +79,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        setLocation(true);
         setUserPosition(-33.957503, 18.462007);
         // First we need to check availability of play services
         if (checkPlayServices()) {
@@ -174,17 +169,66 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "
                 + result.getErrorCode());
     }
 
+    /*
+           {
+                if(locationOn == true){
+
+                }
+            }
+
+        }
+        else{
+            final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("Enable Location")
+                    .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " +
+                            "use this app")
+                    .setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(myIntent);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        }
+                    });
+            dialog.show();
+        }
+
+
+    }
+*/
+
+    private boolean checkLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+
     @Override
     public void onConnected(Bundle connectionHint) {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            setUserPosition(mLastLocation.getLatitude(),mLastLocation.getLongitude());
-            addYourLocation(getUserPosition());
+        if(checkLocationPermission()) {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                setUserPosition(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                addYourLocation(getUserPosition());
+            }
+        }
+        else{
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                //todo explanation
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            }
         }
         fetchWifi();
     }
