@@ -3,6 +3,7 @@ package com.gmail.kelvinmeyer13.findwifi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -11,8 +12,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -20,7 +23,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -28,7 +30,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * variables and such
      **/
-    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final String TAG = MainActivity.class.getSimpleName();
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
     //location
     private LatLng userPosition;
@@ -63,39 +65,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * android lifecycle methods
      */
-    @Override
+    /*@Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putDouble("lat", getUserPosition().latitude );
         outState.putDouble("lng", getUserPosition().longitude );
         super.onSaveInstanceState(outState);
-    }
+    }*/
 
     @Override
     protected void onResume() {
         super.onResume();
-
         checkPlayServices();
-    }
-
-    /**
-     * Method to verify google play services on the device
-     * */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil
-                .isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Toast.makeText(getApplicationContext(),
-                        "This device is not supported.", Toast.LENGTH_LONG)
-                        .show();
-                finish();
-            }
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -112,18 +92,33 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (checkPlayServices()) {
 
             // Building the GoogleApi client
-            buildGoogleApiClient();
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API).build();
         }
-        if (savedInstanceState != null) {
-            Toast.makeText(this, savedInstanceState.getString("message"), Toast.LENGTH_LONG).show();
+        //if (savedInstanceState != null) {
+          //  Toast.makeText(this, savedInstanceState.getString("message"), Toast.LENGTH_LONG).show();
             //set position based on bundle
-        }
-        else{
-            enableBestUpdates();
-        }
+        //}
+        //else{
+            //enableBestUpdates();
+        //}
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         topX = Integer.parseInt(sharedPref.getString(getString(R.string.key_number_wifi),getString(R.string.pref_default_Number_Spots)));
         showOpenOnly =sharedPref.getBoolean(getString(R.string.key_open_switch), true);
+    }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     @Override
@@ -146,14 +141,39 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      *  location methods new
      */
 
+    public int findLocationId(Integer id){
+        int pos = 0;
+        for(int i = 0;i<wifiLocations.length;i++){
+            if(wifiLocations[i].getId()== id){
+                pos = i;
+            }
+        }
+        return pos;
+    }
+
+    private void addYourLocation(LatLng position){
+        mMap.addMarker(new MarkerOptions().position(position).title("You"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(14f));
+    }
+
     /**
-     * Creating google api client object
+     * Method to verify google play services on the device
      * */
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
+    private boolean checkPlayServices() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+        if (result != ConnectionResult.SUCCESS) {
+            if (googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(this, result, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -166,12 +186,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onConnected(Bundle arg0) {
-
-        //todo my code to use the location data
-        // Once connected with google api, get the location
-
+    public void onConnected(Bundle connectionHint) {
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            setUserPosition(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+            addYourLocation(getUserPosition());
+        }
+        fetchWifi();
     }
+
 
     @Override
     public void onConnectionSuspended(int arg0) {
@@ -205,16 +228,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * location methods old
      *
-
-     public int findLocationId(Integer id){
-     int pos = 0;
-     for(int i = 0;i<wifiLocations.length;i++){
-     if(wifiLocations[i].getId()== id){
-     pos = i;
-     }
-     }
-     return pos;
-     }
 
      private void enableBestUpdates() {
      if(isLocationEnabled()){
@@ -273,12 +286,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
      private boolean checkLocationPermission() {
      return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-     }
-
-     private void addYourLocation(LatLng position){
-     mMap.addMarker(new MarkerOptions().position(position).title("You"));
-     mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
-     mMap.moveCamera(CameraUpdateFactory.zoomTo(14f));
      }
 
      private final LocationListener locationListenerBest = new LocationListener() {
