@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -14,12 +15,6 @@ import android.widget.TextView;
 public class DetialActivity extends AppCompatActivity {
 
     private PlaceLocation wifiLocation;
-
-    @Override
-    public void onBackPressed() {
-        Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(mainActivityIntent);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +38,7 @@ public class DetialActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
+
         Intent intent = this.getIntent();
         if(intent != null && intent.hasExtra(intent.EXTRA_TEXT)) {
             wifiLocation = new PlaceLocation(intent.getStringExtra(intent.EXTRA_TEXT));
@@ -64,6 +60,12 @@ public class DetialActivity extends AppCompatActivity {
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
+
+            case R.id.home:
+                //NavUtils.navigateUpFromSameTask(this);
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+
 
             case R.id.action_help_feedback:
                 // User chose the "Favorite" action, mark the current item
