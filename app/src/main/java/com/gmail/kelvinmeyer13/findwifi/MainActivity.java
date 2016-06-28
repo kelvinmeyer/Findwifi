@@ -157,9 +157,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.zoomTo(14f));
     }
 
-    /**
-     * Method to verify google play services on the device
-     * */
     private boolean checkPlayServices() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(this);
@@ -176,9 +173,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
-    /**
-     * Google api callback methods
-     */
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "
@@ -201,12 +195,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mGoogleApiClient.connect();
     }
 
-
-
     /**
      *  wifi methods
      */
-
     private void fetchWifi(){
         FindWifiTask wifiTask = new FindWifiTask();
         wifiTask.execute(getUserPosition());
@@ -224,105 +215,4 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
-    /**
-     * location methods old
-     *
-
-     private void enableBestUpdates() {
-     if(isLocationEnabled()){
-     if(checkLocationPermission()){
-     if(locationOn){
-     Criteria criteria = new Criteria();
-     criteria.setAccuracy(Criteria.ACCURACY_FINE);
-     criteria.setAltitudeRequired(false);
-     criteria.setBearingRequired(false);
-     criteria.setCostAllowed(true);
-     criteria.setPowerRequirement(Criteria.POWER_LOW);
-     String provider = locationManager.getBestProvider(criteria, true);
-     if (provider != null) {
-     locationManager.requestLocationUpdates(provider, 2 * 60 * 1000, 10, locationListenerBest);
-     Toast.makeText(this, "Best Provider is " + provider, Toast.LENGTH_LONG).show();
-     }
-     }
-     }
-     else{
-     // Should we show an explanation?
-     if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-     //todo explanation
-     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_COURSE_LOCATION);
-     } else {
-     // No explanation needed, we can request the permission.
-     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_COURSE_LOCATION);
-     }
-     }
-     }
-     else{
-     final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-     dialog.setTitle("Enable Location")
-     .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " +
-     "use this app")
-     .setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
-    @Override
-    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-    startActivity(myIntent);
-    }
-    })
-     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-    @Override
-    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-    }
-    });
-     dialog.show();
-     }
-
-
-     }
-
-     private boolean isLocationEnabled() {
-     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-     }
-
-     private boolean checkLocationPermission() {
-     return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-     }
-
-     private final LocationListener locationListenerBest = new LocationListener() {
-     public void onLocationChanged(final Location location) {
-     final double longitudeBest = location.getLongitude();
-     Log.d("maps", "lng: " + longitudeBest);
-     final double latitudeBest = location.getLatitude();
-     Log.d("maps", "lat: " + latitudeBest);
-     setLocation(false);
-     runOnUiThread(new Runnable() {
-    @Override
-    public void run() {
-    setUserPosition(latitudeBest, longitudeBest);
-    Toast.makeText(MainActivity.this, "Best Provider update", Toast.LENGTH_SHORT).show();
-    LatLng pos = getUserPosition();
-    mMap.clear();
-    addYourLocation(pos);
-    fetchWifi();
-    }
-    });
-
-     }
-
-     @Override
-     public void onStatusChanged(String s, int i, Bundle bundle) {
-
-     }
-
-     @Override
-     public void onProviderEnabled(String s) {
-
-     }
-
-     @Override
-     public void onProviderDisabled(String s) {
-
-     }
-     };
-     **/
 }
