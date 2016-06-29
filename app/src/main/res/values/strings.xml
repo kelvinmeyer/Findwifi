@@ -14,4 +14,7 @@
     <string name="key_open_switch">key_open_closed_switch</string>
     <string name="key_number_wifi">key_number_wifi_spots_text</string>
     <string name="pref_default_Number_Spots">"20"</string>
+    <string name="title_activity_about">About</string>
+    <string name="icon_references">Icons made by Gregor Cresnar from www.flaticon.com</string>
+    <string name="about">About</string>
 </resources>

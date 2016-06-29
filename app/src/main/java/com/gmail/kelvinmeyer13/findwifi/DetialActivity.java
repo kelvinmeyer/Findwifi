@@ -72,6 +72,10 @@ public class DetialActivity extends AppCompatActivity {
                 // as a favorite...
                 return true;
 
+            case R.id.about:
+                startActivity(new Intent(this, About.class));
+                return true;
+
             case R.id.action_share:
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
