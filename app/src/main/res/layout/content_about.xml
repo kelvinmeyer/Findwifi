@@ -15,8 +15,19 @@
 
     <TextView
         android:layout_width="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_height="wrap_content"
         android:text="@string/icon_references"
-        android:id="@+id/textView"
-        android:layout_gravity="center_horizontal" />
+        android:id="@+id/IconAtribText"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Thanks to the team over at findwifi.co.za for the amazing api this app is built on"
+        android:id="@+id/ApiAtribText"
+        android:layout_gravity="right"
+        android:paddingTop="5dp" />
 </LinearLayout>
